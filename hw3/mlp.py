@@ -113,13 +113,21 @@ Defining our First PyTorch Model
 
 
 class SentimentClassifier(nn.Module):
-    def __init__(self, embed_dim: int, num_classes: int, hidden_dims: List[int]):
+    def __init__(self, embed_dim: int, num_classes: int, hidden_dims: List[int], activation_type: str = "sigmoid"):
         super().__init__()
         self.embed_dim = embed_dim
         self.num_classes = num_classes
 
         # activation function
-        self.activation = nn.Sigmoid()
+        #self.activation = nn.Sigmoid()
+        if activation_type == "sigmoid":
+            self.activation = nn.Sigmoid()
+        elif activation_type == "relu":
+            self.activation = nn.ReLU()
+        elif activation_type == "tanh":
+            self.activation = nn.Tanh()
+        else:
+            raise ValueError(f"Unsupported activation type: {activation_type}")
 
         # linear layers for the MLP
         self.linears = nn.ModuleList()
@@ -283,7 +291,7 @@ def run_mlp(config: easydict.EasyDict,
     test_dataloader = create_dataloader(test_dataset, config.batch_size, shuffle=False)
 
     print(f"{'-' * 10} Load Model {'-' * 10}")
-    model = SentimentClassifier(embeddings.vector_size, config.num_classes, config.hidden_dims)
+    model = SentimentClassifier(embeddings.vector_size, config.num_classes, config.hidden_dims, config.activation_type)
     # define optimizer that manages the model's parameters and gradient updates
     # we will learn more about optimizers in future lectures and homework
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
